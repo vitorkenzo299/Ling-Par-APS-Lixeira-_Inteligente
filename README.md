@@ -1,0 +1,1 @@
+# Ling-Par-APS-Lixeira-_nteligente
