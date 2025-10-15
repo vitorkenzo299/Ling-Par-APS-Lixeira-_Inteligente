@@ -66,8 +66,28 @@ S2 → capacidade máxima do lixo dos recicláveis.
 
 S3 → tipo do lixo detectado (0 = orgânico, 1 = reciclável).
 
-### Exemplo
+# Como Compilar e Executar
 ```
+-> Compilar o projeto
+    make
+
+-> Limpar arquivos gerados
+    make clean
+
+-> Modo interativo
+    ./analisador
+
+-> Analisar arquivo de código
+    ./analisador < teste_sintaxe.txt
+
+-> Teste rápido
+    echo "organico = 50; reciclavel = 30;" | ./analisador
+
+```
+
+### Exemplo 1
+```
+ChecarOLixo();
 sepa (tipoLixo == 1) {
     sepa (reciclavel < capReciclavel) {
         EsseLixopodeSerReapoveitado();
@@ -81,4 +101,17 @@ sepa (tipoLixo == 1) {
         EsvaziarLixoFedido();
     }
 }
+
+```
+
+### Exemplo 2
+```
+_707070_SenNaoDer_70_Denovo_ (organico < 100) {
+    ChecarOLixo();
+    sepa (tipoLixo == 0) {
+        EsseLixoEstragaFacil();
+        mostraAe(organico);
+    }
+}
+
 ```
