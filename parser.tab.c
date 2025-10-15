@@ -75,10 +75,9 @@
 int yylex(void);
 void yyerror(const char *s);
 
-// Apenas para demonstração - sem execução real
 int parse_success = 0;
 
-#line 82 "parser.tab.c"
+#line 81 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -545,11 +544,11 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    34,    34,    37,    43,    46,    49,    52,    58,    61,
-      67,    70,    73,    76,    79,    82,    89,    88,    96,    98,
-     104,   106,   113,   120,   124,   125,   126,   130,   131,   132,
-     133,   134,   138,   139,   140,   144,   145,   146,   157,   158,
-     159,   160,   161,   162,   163
+       0,    33,    33,    36,    42,    45,    48,    51,    57,    60,
+      66,    69,    72,    75,    78,    81,    88,    87,    95,    96,
+     102,   103,   110,   117,   121,   122,   123,   127,   128,   129,
+     130,   131,   135,   136,   137,   141,   142,   143,   154,   155,
+     156,   157,   158,   159,   160
 };
 #endif
 
@@ -1176,235 +1175,235 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* programa: %empty  */
-#line 34 "parser.y"
-                { 
+#line 33 "parser.y"
+    { 
         printf("Análise sintática iniciada...\n"); 
     }
-#line 1184 "parser.tab.c"
+#line 1183 "parser.tab.c"
     break;
 
   case 3: /* programa: programa comando  */
-#line 37 "parser.y"
+#line 36 "parser.y"
                        { 
         printf("Comando reconhecido\n"); 
     }
-#line 1192 "parser.tab.c"
+#line 1191 "parser.tab.c"
     break;
 
   case 4: /* comando: atribuicao PONTO_VIRGULA  */
-#line 43 "parser.y"
+#line 42 "parser.y"
                              { 
         printf("Atribuição reconhecida\n"); 
     }
-#line 1200 "parser.tab.c"
+#line 1199 "parser.tab.c"
     break;
 
   case 5: /* comando: acao PONTO_VIRGULA  */
-#line 46 "parser.y"
+#line 45 "parser.y"
                          { 
         printf("Ação reconhecida\n"); 
     }
-#line 1208 "parser.tab.c"
+#line 1207 "parser.tab.c"
     break;
 
   case 6: /* comando: condicional  */
-#line 49 "parser.y"
+#line 48 "parser.y"
                   { 
         printf("Condicional reconhecida\n"); 
     }
-#line 1216 "parser.tab.c"
+#line 1215 "parser.tab.c"
     break;
 
   case 7: /* comando: loop  */
-#line 52 "parser.y"
+#line 51 "parser.y"
            { 
         printf("Loop reconhecido\n"); 
     }
-#line 1224 "parser.tab.c"
+#line 1223 "parser.tab.c"
     break;
 
   case 8: /* atribuicao: RECICLAVEL ATRIBUICAO expressao  */
-#line 58 "parser.y"
+#line 57 "parser.y"
                                     { 
         printf("Atribuição para reciclavel\n"); 
     }
-#line 1232 "parser.tab.c"
+#line 1231 "parser.tab.c"
     break;
 
   case 9: /* atribuicao: ORGANICO ATRIBUICAO expressao  */
-#line 61 "parser.y"
+#line 60 "parser.y"
                                     { 
         printf("Atribuição para organico\n"); 
     }
-#line 1240 "parser.tab.c"
+#line 1239 "parser.tab.c"
     break;
 
   case 10: /* acao: CHECAR_LIXO ABRE_PAR FECHA_PAR  */
-#line 67 "parser.y"
+#line 66 "parser.y"
                                    { 
         printf("Comando: ChecarOLixo\n"); 
     }
-#line 1248 "parser.tab.c"
+#line 1247 "parser.tab.c"
     break;
 
   case 11: /* acao: ADD_ORGANICO ABRE_PAR FECHA_PAR  */
-#line 70 "parser.y"
+#line 69 "parser.y"
                                       {
         printf("Comando: EsseLixoEstragaFacil\n"); 
     }
-#line 1256 "parser.tab.c"
+#line 1255 "parser.tab.c"
     break;
 
   case 12: /* acao: ADD_RECICLAVEL ABRE_PAR FECHA_PAR  */
-#line 73 "parser.y"
+#line 72 "parser.y"
                                         {
         printf("Comando: EsseLixopodeSerReapoveitado\n"); 
     }
-#line 1264 "parser.tab.c"
+#line 1263 "parser.tab.c"
     break;
 
   case 13: /* acao: ESVAZIAR_ORGANICO ABRE_PAR FECHA_PAR  */
-#line 76 "parser.y"
+#line 75 "parser.y"
                                            {
         printf("Comando: EsvaziarLixoFedido\n"); 
     }
-#line 1272 "parser.tab.c"
+#line 1271 "parser.tab.c"
     break;
 
   case 14: /* acao: ESVAZIAR_RECICLAVEL ABRE_PAR FECHA_PAR  */
-#line 79 "parser.y"
+#line 78 "parser.y"
                                              {
         printf("Comando: EsvaziarLixoCheiroso\n"); 
     }
-#line 1280 "parser.tab.c"
+#line 1279 "parser.tab.c"
     break;
 
   case 15: /* acao: MOSTRA_AE ABRE_PAR expressao FECHA_PAR  */
-#line 82 "parser.y"
+#line 81 "parser.y"
                                              {
         printf("Comando: mostraAe com expressão\n"); 
     }
-#line 1288 "parser.tab.c"
+#line 1287 "parser.tab.c"
     break;
 
   case 16: /* $@1: %empty  */
-#line 89 "parser.y"
+#line 88 "parser.y"
     {
         printf("Condicional 'sepa' reconhecida\n");
     }
-#line 1296 "parser.tab.c"
+#line 1295 "parser.tab.c"
     break;
 
   case 19: /* dependendo_chain: dependendo_chain DEPENDENDO ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE  */
-#line 99 "parser.y"
+#line 97 "parser.y"
     {
         printf("Condicional 'dependendo' reconhecida\n");
     }
-#line 1304 "parser.tab.c"
+#line 1303 "parser.tab.c"
     break;
 
   case 21: /* naosepa_opcional: NAOSEPA ABRE_CHAVE programa FECHA_CHAVE  */
-#line 107 "parser.y"
+#line 104 "parser.y"
     {
         printf("Bloco 'naosepa' reconhecido\n");
     }
-#line 1312 "parser.tab.c"
+#line 1311 "parser.tab.c"
     break;
 
   case 22: /* loop: LOOP ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE  */
-#line 114 "parser.y"
+#line 111 "parser.y"
     {
         printf("Loop 'while' reconhecido\n");
     }
-#line 1320 "parser.tab.c"
+#line 1319 "parser.tab.c"
     break;
 
   case 23: /* expressao: expressao_logica  */
-#line 120 "parser.y"
+#line 117 "parser.y"
                      { (yyval.num) = (yyvsp[0].num); }
-#line 1326 "parser.tab.c"
+#line 1325 "parser.tab.c"
     break;
 
   case 24: /* expressao_logica: comparacao  */
-#line 124 "parser.y"
+#line 121 "parser.y"
                { (yyval.num) = (yyvsp[0].num); }
-#line 1332 "parser.tab.c"
+#line 1331 "parser.tab.c"
     break;
 
   case 25: /* expressao_logica: expressao_logica IGUAL comparacao  */
-#line 125 "parser.y"
+#line 122 "parser.y"
                                         { (yyval.num) = ((yyvsp[-2].num) == (yyvsp[0].num)); }
-#line 1338 "parser.tab.c"
+#line 1337 "parser.tab.c"
     break;
 
   case 26: /* expressao_logica: expressao_logica DIFERENTE comparacao  */
-#line 126 "parser.y"
+#line 123 "parser.y"
                                             { (yyval.num) = ((yyvsp[-2].num) != (yyvsp[0].num)); }
-#line 1344 "parser.tab.c"
+#line 1343 "parser.tab.c"
     break;
 
   case 27: /* comparacao: adicao  */
-#line 130 "parser.y"
+#line 127 "parser.y"
            { (yyval.num) = (yyvsp[0].num); }
-#line 1350 "parser.tab.c"
+#line 1349 "parser.tab.c"
     break;
 
   case 28: /* comparacao: comparacao MENOR adicao  */
-#line 131 "parser.y"
+#line 128 "parser.y"
                               { (yyval.num) = ((yyvsp[-2].num) < (yyvsp[0].num)); }
-#line 1356 "parser.tab.c"
+#line 1355 "parser.tab.c"
     break;
 
   case 29: /* comparacao: comparacao MAIOR adicao  */
-#line 132 "parser.y"
+#line 129 "parser.y"
                               { (yyval.num) = ((yyvsp[-2].num) > (yyvsp[0].num)); }
-#line 1362 "parser.tab.c"
+#line 1361 "parser.tab.c"
     break;
 
   case 30: /* comparacao: comparacao MENOR_IGUAL adicao  */
-#line 133 "parser.y"
+#line 130 "parser.y"
                                     { (yyval.num) = ((yyvsp[-2].num) <= (yyvsp[0].num)); }
-#line 1368 "parser.tab.c"
+#line 1367 "parser.tab.c"
     break;
 
   case 31: /* comparacao: comparacao MAIOR_IGUAL adicao  */
-#line 134 "parser.y"
+#line 131 "parser.y"
                                     { (yyval.num) = ((yyvsp[-2].num) >= (yyvsp[0].num)); }
-#line 1374 "parser.tab.c"
+#line 1373 "parser.tab.c"
     break;
 
   case 32: /* adicao: multiplicacao  */
-#line 138 "parser.y"
+#line 135 "parser.y"
                   { (yyval.num) = (yyvsp[0].num); }
-#line 1380 "parser.tab.c"
+#line 1379 "parser.tab.c"
     break;
 
   case 33: /* adicao: adicao MAIS multiplicacao  */
-#line 139 "parser.y"
+#line 136 "parser.y"
                                 { (yyval.num) = (yyvsp[-2].num) + (yyvsp[0].num); }
-#line 1386 "parser.tab.c"
+#line 1385 "parser.tab.c"
     break;
 
   case 34: /* adicao: adicao MENOS multiplicacao  */
-#line 140 "parser.y"
+#line 137 "parser.y"
                                  { (yyval.num) = (yyvsp[-2].num) - (yyvsp[0].num); }
-#line 1392 "parser.tab.c"
+#line 1391 "parser.tab.c"
     break;
 
   case 35: /* multiplicacao: primaria  */
-#line 144 "parser.y"
+#line 141 "parser.y"
              { (yyval.num) = (yyvsp[0].num); }
-#line 1398 "parser.tab.c"
+#line 1397 "parser.tab.c"
     break;
 
   case 36: /* multiplicacao: multiplicacao MULT primaria  */
-#line 145 "parser.y"
+#line 142 "parser.y"
                                   { (yyval.num) = (yyvsp[-2].num) * (yyvsp[0].num); }
-#line 1404 "parser.tab.c"
+#line 1403 "parser.tab.c"
     break;
 
   case 37: /* multiplicacao: multiplicacao DIV primaria  */
-#line 146 "parser.y"
+#line 143 "parser.y"
                                  { 
         if ((yyvsp[0].num) == 0) {
             yyerror("Divisão por zero!");
@@ -1413,53 +1412,53 @@ yyreduce:
             (yyval.num) = (yyvsp[-2].num) / (yyvsp[0].num);
         }
     }
-#line 1417 "parser.tab.c"
+#line 1416 "parser.tab.c"
     break;
 
   case 38: /* primaria: NUMERO  */
-#line 157 "parser.y"
+#line 154 "parser.y"
            { (yyval.num) = (yyvsp[0].num); }
-#line 1423 "parser.tab.c"
+#line 1422 "parser.tab.c"
     break;
 
   case 39: /* primaria: RECICLAVEL  */
-#line 158 "parser.y"
+#line 155 "parser.y"
                  { (yyval.num) = 0; }
-#line 1429 "parser.tab.c"
+#line 1428 "parser.tab.c"
     break;
 
   case 40: /* primaria: ORGANICO  */
-#line 159 "parser.y"
+#line 156 "parser.y"
                { (yyval.num) = 0; }
-#line 1435 "parser.tab.c"
+#line 1434 "parser.tab.c"
     break;
 
   case 41: /* primaria: CAP_RECICLAVEL  */
-#line 160 "parser.y"
+#line 157 "parser.y"
                      { (yyval.num) = 0; }
-#line 1441 "parser.tab.c"
+#line 1440 "parser.tab.c"
     break;
 
   case 42: /* primaria: CAP_ORGANICO  */
-#line 161 "parser.y"
+#line 158 "parser.y"
                    { (yyval.num) = 0; }
-#line 1447 "parser.tab.c"
+#line 1446 "parser.tab.c"
     break;
 
   case 43: /* primaria: TIPO_LIXO  */
-#line 162 "parser.y"
+#line 159 "parser.y"
                 { (yyval.num) = 0; }
-#line 1453 "parser.tab.c"
+#line 1452 "parser.tab.c"
     break;
 
   case 44: /* primaria: ABRE_PAR expressao FECHA_PAR  */
-#line 163 "parser.y"
+#line 160 "parser.y"
                                    { (yyval.num) = (yyvsp[-1].num); }
-#line 1459 "parser.tab.c"
+#line 1458 "parser.tab.c"
     break;
 
 
-#line 1463 "parser.tab.c"
+#line 1462 "parser.tab.c"
 
       default: break;
     }
@@ -1652,7 +1651,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 166 "parser.y"
+#line 163 "parser.y"
 
 
 void yyerror(const char *s) {

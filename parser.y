@@ -5,7 +5,6 @@
 int yylex(void);
 void yyerror(const char *s);
 
-// Apenas para demonstração - sem execução real
 int parse_success = 0;
 %}
 
@@ -31,7 +30,7 @@ int parse_success = 0;
 %%
 
 programa:
-    /* vazio */ { 
+    { 
         printf("Análise sintática iniciada...\n"); 
     }
     | programa comando { 
@@ -94,7 +93,6 @@ condicional:
     ;
 
 dependendo_chain:
-    /* vazio */
     | dependendo_chain DEPENDENDO ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE
     {
         printf("Condicional 'dependendo' reconhecida\n");
@@ -102,7 +100,6 @@ dependendo_chain:
     ;
 
 naosepa_opcional:
-    /* vazio */
     | NAOSEPA ABRE_CHAVE programa FECHA_CHAVE
     {
         printf("Bloco 'naosepa' reconhecido\n");
