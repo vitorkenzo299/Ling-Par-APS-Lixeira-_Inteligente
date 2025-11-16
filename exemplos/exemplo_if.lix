@@ -1,0 +1,6 @@
+meuTipo = ChecarOLixo();
+sepa (meuTipo == 1) {
+    EsseLixopodeSerReapoveitado();
+} naosepa {
+    EsseLixoEstragaFacil();
+}

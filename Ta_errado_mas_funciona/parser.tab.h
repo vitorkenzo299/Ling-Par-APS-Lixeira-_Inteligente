@@ -54,37 +54,38 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    NUMERO = 258,                  /* NUMERO  */
-    ID = 259,                      /* ID  */
-    CHECAR_LIXO = 260,             /* CHECAR_LIXO  */
-    ADD_ORGANICO = 261,            /* ADD_ORGANICO  */
-    ADD_RECICLAVEL = 262,          /* ADD_RECICLAVEL  */
-    ESVAZIAR_ORGANICO = 263,       /* ESVAZIAR_ORGANICO  */
-    ESVAZIAR_RECICLAVEL = 264,     /* ESVAZIAR_RECICLAVEL  */
-    MOSTRA_AE = 265,               /* MOSTRA_AE  */
-    SEPA = 266,                    /* SEPA  */
-    DEPENDENDO = 267,              /* DEPENDENDO  */
-    NAOSEPA = 268,                 /* NAOSEPA  */
-    LOOP = 269,                    /* LOOP  */
-    CAP_RECICLAVEL = 270,          /* CAP_RECICLAVEL  */
-    CAP_ORGANICO = 271,            /* CAP_ORGANICO  */
-    TIPO_LIXO = 272,               /* TIPO_LIXO  */
-    IGUAL = 273,                   /* IGUAL  */
-    DIFERENTE = 274,               /* DIFERENTE  */
-    MENOR_IGUAL = 275,             /* MENOR_IGUAL  */
-    MAIOR_IGUAL = 276,             /* MAIOR_IGUAL  */
-    MENOR = 277,                   /* MENOR  */
-    MAIOR = 278,                   /* MAIOR  */
-    ATRIBUICAO = 279,              /* ATRIBUICAO  */
-    MAIS = 280,                    /* MAIS  */
-    MENOS = 281,                   /* MENOS  */
-    MULT = 282,                    /* MULT  */
-    DIV = 283,                     /* DIV  */
-    ABRE_PAR = 284,                /* ABRE_PAR  */
-    FECHA_PAR = 285,               /* FECHA_PAR  */
-    ABRE_CHAVE = 286,              /* ABRE_CHAVE  */
-    FECHA_CHAVE = 287,             /* FECHA_CHAVE  */
-    PONTO_VIRGULA = 288            /* PONTO_VIRGULA  */
+    CHECAR_LIXO = 258,             /* CHECAR_LIXO  */
+    ADD_ORGANICO = 259,            /* ADD_ORGANICO  */
+    ADD_RECICLAVEL = 260,          /* ADD_RECICLAVEL  */
+    ESVAZIAR_ORGANICO = 261,       /* ESVAZIAR_ORGANICO  */
+    ESVAZIAR_RECICLAVEL = 262,     /* ESVAZIAR_RECICLAVEL  */
+    MOSTRA_AE = 263,               /* MOSTRA_AE  */
+    SEPA = 264,                    /* SEPA  */
+    DEPENDENDO = 265,              /* DEPENDENDO  */
+    NAOSEPA = 266,                 /* NAOSEPA  */
+    LOOP = 267,                    /* LOOP  */
+    NUMERO = 268,                  /* NUMERO  */
+    RECICLAVEL = 269,              /* RECICLAVEL  */
+    ORGANICO = 270,                /* ORGANICO  */
+    CAP_RECICLAVEL = 271,          /* CAP_RECICLAVEL  */
+    CAP_ORGANICO = 272,            /* CAP_ORGANICO  */
+    TIPO_LIXO = 273,               /* TIPO_LIXO  */
+    IGUAL = 274,                   /* IGUAL  */
+    DIFERENTE = 275,               /* DIFERENTE  */
+    MENOR_IGUAL = 276,             /* MENOR_IGUAL  */
+    MAIOR_IGUAL = 277,             /* MAIOR_IGUAL  */
+    MENOR = 278,                   /* MENOR  */
+    MAIOR = 279,                   /* MAIOR  */
+    ATRIBUICAO = 280,              /* ATRIBUICAO  */
+    MAIS = 281,                    /* MAIS  */
+    MENOS = 282,                   /* MENOS  */
+    MULT = 283,                    /* MULT  */
+    DIV = 284,                     /* DIV  */
+    ABRE_PAR = 285,                /* ABRE_PAR  */
+    FECHA_PAR = 286,               /* FECHA_PAR  */
+    ABRE_CHAVE = 287,              /* ABRE_CHAVE  */
+    FECHA_CHAVE = 288,             /* FECHA_CHAVE  */
+    PONTO_VIRGULA = 289            /* PONTO_VIRGULA  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -93,10 +94,9 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 94 "parser.y"
+#line 16 "parser.y"
 
     int num;
-    char *str;
 
 #line 102 "parser.tab.h"
 

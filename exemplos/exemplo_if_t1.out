@@ -1,0 +1,11 @@
+1
+
+-- VM final state --
+Registers:
+  R1 = 0
+  R2 = 1
+  R3 = 1
+  R4 = 1
+Variables:
+  meuTipo = 1
+-- end --

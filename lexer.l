@@ -1,34 +1,35 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "parser.tab.h"
 
+extern YYSTYPE yylval;
 void yyerror(const char *s);
 %}
 
-%option noyywrap nounput noinput
+%option noyywrap
 
 DIGITO   [0-9]
 ID       [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
-"ChecarOLixo"                 { return CHECAR_LIXO; }
-"EsseLixoEstragaFacil"        { return ADD_ORGANICO; }
-"EsseLixopodeSerReapoveitado" { return ADD_RECICLAVEL; }
-"EsvaziarLixoFedido"          { return ESVAZIAR_ORGANICO; }
-"EsvaziarLixoCheiroso"        { return ESVAZIAR_RECICLAVEL; }
-"mostraAe"                    { return MOSTRA_AE; }
-"sepa"                        { return SEPA; }
-"dependendo"                  { return DEPENDENDO; }
-"naosepa"                     { return NAOSEPA; }
-"_707070_SenNaoDer_70_Denovo_" { return LOOP; }
+ChecarOLixo                 { return CHECAR_LIXO; }
+EsseLixoEstragaFacil        { return ADD_ORGANICO; }
+EsseLixopodeSerReapoveitado { return ADD_RECICLAVEL; }
+EsvaziarLixoFedido          { return ESVAZIAR_ORGANICO; }
+EsvaziarLixoCheiroso        { return ESVAZIAR_RECICLAVEL; }
+mostraAe                    { return MOSTRA_AE; }
 
-"reciclavel"                  { return RECICLAVEL; }
-"organico"                    { return ORGANICO; }
-"capReciclavel"               { return CAP_RECICLAVEL; }
-"capOrganico"                 { return CAP_ORGANICO; }
-"tipoLixo"                    { return TIPO_LIXO; }
+sepa                        { return SEPA; }
+dependendo                  { return DEPENDENDO; }
+naosepa                     { return NAOSEPA; }
+_707070_SenNaoDer_70_Denovo_ { return LOOP; }
+
+capReciclavel               { return CAP_RECICLAVEL; }
+capOrganico                 { return CAP_ORGANICO; }
+tipoLixo                    { return TIPO_LIXO; }
 
 {DIGITO}+      { yylval.num = atoi(yytext); return NUMERO; }
 
@@ -49,9 +50,15 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "}"            { return FECHA_CHAVE; }
 ";"            { return PONTO_VIRGULA; }
 
-[ \t\r\n]      ; /* Ignora espaços, tabs e newlines */
-.              { 
-    fprintf(stderr, "Caractere inválido: '%c'\n", *yytext); 
+{ID}           {
+                  yylval.str = strdup(yytext);
+                  return ID;
+               }
+
+[ \t\r\n]+     { /* ignore whitespace */ }
+
+.              {
+    fprintf(stderr, "Caractere inválido: '%c' (ASCII %d)\n", yytext[0], (unsigned char)yytext[0]);
 }
 
 %%

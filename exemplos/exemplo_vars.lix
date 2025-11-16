@@ -1,0 +1,6 @@
+reciclavel = 0;
+organico = 0;
+EsseLixopodeSerReapoveitado();
+EsseLixoEstragaFacil();
+mostraAe(reciclavel);
+mostraAe(organico);

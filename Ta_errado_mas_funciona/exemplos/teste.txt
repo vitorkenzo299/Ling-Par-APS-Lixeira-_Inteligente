@@ -1,0 +1,19 @@
+ChecarOLixo();
+sepa (tipoLixo == 1) {
+    sepa (reciclavel < capReciclavel) {
+        EsseLixopodeSerReapoveitado();
+        mostraAe(reciclavel);
+    } dependendo (reciclavel >= capReciclavel) {
+        EsvaziarLixoCheiroso();
+    }
+} naosepa {
+    sepa (organico < capOrganico) {
+        EsseLixoEstragaFacil();
+        mostraAe(organico);
+    } dependendo (organico >= capOrganico) {
+        EsvaziarLixoFedido();
+    }
+}
+
+organico = 95;
+reciclavel = 98;

@@ -67,98 +67,22 @@
 
 
 /* First part of user prologue.  */
-#line 3 "parser.y"
+#line 1 "parser.y"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "codegen.h"
 
 int yylex(void);
 void yyerror(const char *s);
 
-/* Pilhas para gerenciar rótulos de IF aninhados e dependendo labels */
-#define IF_STACK_MAX 256
-static char *if_else_stack[IF_STACK_MAX];
-static char *if_end_stack[IF_STACK_MAX];
-static int if_sp = 0;
-
-static char *depend_stack[IF_STACK_MAX];
-static int depend_sp = 0;
-
-/* mapear destinos fixos */
-
-   static const char *map_var_to_reg(const char *name) __attribute__((unused));
-   
-   static const char *map_var_to_reg(const char *name) __attribute__((unused));
-   static const char *map_var_to_reg(const char *name) {
-  
-  
-    if (!name) return NULL;
-    if (strcmp(name, "reciclavel") == 0) return "R2";
-    if (strcmp(name, "organico") == 0)   return "R1";
-    return NULL;
-}
-
-/* avaliar identificador em R3 (origem) - agora suporta LOADVAR para variáveis genéricas */
-static void gen_eval_id_to_R3(const char *name) {
-    if (strcmp(name, "reciclavel") == 0) {
-        emit("MOV R3 R2");
-    } else if (strcmp(name, "organico") == 0) {
-        emit("MOV R3 R1");
-    } else if (strcmp(name, "capReciclavel") == 0) {
-        emit("LOADSENSOR R3 CAP_RECICLAVEL");
-    } else if (strcmp(name, "capOrganico") == 0) {
-        emit("LOADSENSOR R3 CAP_ORGANICO");
-    } else if (strcmp(name, "tipoLixo") == 0) {
-        emit("LOADSENSOR R3 TIPO_LIXO");
-    } else {
-        /* variável genérica: carregar da "memória" */
-        emit("; LOAD variable %s -> R3", name);
-        emit("LOADVAR R3 %s", name);
-    }
-}
-
-/* armazenar R3 em variável destino */
-static void gen_store_R3_to_var(const char *name) {
-    if (strcmp(name, "reciclavel") == 0) {
-        emit("; STORE R3 -> reciclavel (R2)");
-        emit("MOV R2 R3");
-    } else if (strcmp(name, "organico") == 0) {
-        emit("; STORE R3 -> organico (R1)");
-        emit("MOV R1 R3");
-    } else {
-        emit("; STOREVAR %s <- R3", name);
-        emit("STOREVAR %s R3", name);
-    }
-}
-
-/* checar lixo -> R3 */
-static void gen_eval_checar_to_R3(void) {
-    emit("LOADSENSOR R3 TIPO_LIXO");
-}
-
-/* comparação/arithmetic helpers (geram operações que assumem R4=left, R3=right e escrevem resultado em R3) */
-static void gen_cmp_result_in_R3(const char *op) {
-    if (strcmp(op, "==") == 0) emit("EQ R3 R4 R3");
-    else if (strcmp(op, "!=") == 0) emit("NE R3 R4 R3");
-    else if (strcmp(op, "<") == 0) emit("LT R3 R4 R3");
-    else if (strcmp(op, ">") == 0) emit("GT R3 R4 R3");
-    else if (strcmp(op, "<=") == 0) emit("LE R3 R4 R3");
-    else if (strcmp(op, ">=") == 0) emit("GE R3 R4 R3");
-    else emit("SET R3 0");
-}
-
-static void gen_arith_with_R4_R3(const char *op) {
-    if (strcmp(op, "+") == 0) emit("ADD R3 R4 R3");
-    else if (strcmp(op, "-") == 0) emit("SUB R3 R4 R3");
-    else if (strcmp(op, "*") == 0) emit("MUL R3 R4 R3");
-    else if (strcmp(op, "/") == 0) emit("DIV R3 R4 R3");
-    else emit("SET R3 0");
-}
+int organico = 0;
+int reciclavel = 0;
+const int capOrganico = 100;
+const int capReciclavel = 100;
+int tipoLixo = 0;
 
 
-#line 162 "parser.tab.c"
+#line 86 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -189,55 +113,54 @@ enum yysymbol_kind_t
   YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_NUMERO = 3,                     /* NUMERO  */
-  YYSYMBOL_ID = 4,                         /* ID  */
-  YYSYMBOL_CHECAR_LIXO = 5,                /* CHECAR_LIXO  */
-  YYSYMBOL_ADD_ORGANICO = 6,               /* ADD_ORGANICO  */
-  YYSYMBOL_ADD_RECICLAVEL = 7,             /* ADD_RECICLAVEL  */
-  YYSYMBOL_ESVAZIAR_ORGANICO = 8,          /* ESVAZIAR_ORGANICO  */
-  YYSYMBOL_ESVAZIAR_RECICLAVEL = 9,        /* ESVAZIAR_RECICLAVEL  */
-  YYSYMBOL_MOSTRA_AE = 10,                 /* MOSTRA_AE  */
-  YYSYMBOL_SEPA = 11,                      /* SEPA  */
-  YYSYMBOL_DEPENDENDO = 12,                /* DEPENDENDO  */
-  YYSYMBOL_NAOSEPA = 13,                   /* NAOSEPA  */
-  YYSYMBOL_LOOP = 14,                      /* LOOP  */
-  YYSYMBOL_CAP_RECICLAVEL = 15,            /* CAP_RECICLAVEL  */
-  YYSYMBOL_CAP_ORGANICO = 16,              /* CAP_ORGANICO  */
-  YYSYMBOL_TIPO_LIXO = 17,                 /* TIPO_LIXO  */
-  YYSYMBOL_IGUAL = 18,                     /* IGUAL  */
-  YYSYMBOL_DIFERENTE = 19,                 /* DIFERENTE  */
-  YYSYMBOL_MENOR_IGUAL = 20,               /* MENOR_IGUAL  */
-  YYSYMBOL_MAIOR_IGUAL = 21,               /* MAIOR_IGUAL  */
-  YYSYMBOL_MENOR = 22,                     /* MENOR  */
-  YYSYMBOL_MAIOR = 23,                     /* MAIOR  */
-  YYSYMBOL_ATRIBUICAO = 24,                /* ATRIBUICAO  */
-  YYSYMBOL_MAIS = 25,                      /* MAIS  */
-  YYSYMBOL_MENOS = 26,                     /* MENOS  */
-  YYSYMBOL_MULT = 27,                      /* MULT  */
-  YYSYMBOL_DIV = 28,                       /* DIV  */
-  YYSYMBOL_ABRE_PAR = 29,                  /* ABRE_PAR  */
-  YYSYMBOL_FECHA_PAR = 30,                 /* FECHA_PAR  */
-  YYSYMBOL_ABRE_CHAVE = 31,                /* ABRE_CHAVE  */
-  YYSYMBOL_FECHA_CHAVE = 32,               /* FECHA_CHAVE  */
-  YYSYMBOL_PONTO_VIRGULA = 33,             /* PONTO_VIRGULA  */
-  YYSYMBOL_YYACCEPT = 34,                  /* $accept  */
-  YYSYMBOL_programa = 35,                  /* programa  */
-  YYSYMBOL_comando = 36,                   /* comando  */
-  YYSYMBOL_atribuicao = 37,                /* atribuicao  */
-  YYSYMBOL_acao = 38,                      /* acao  */
-  YYSYMBOL_condicional = 39,               /* condicional  */
-  YYSYMBOL_40_1 = 40,                      /* $@1  */
-  YYSYMBOL_41_2 = 41,                      /* $@2  */
-  YYSYMBOL_cond_dependendo_opt = 42,       /* cond_dependendo_opt  */
-  YYSYMBOL_43_3 = 43,                      /* $@3  */
-  YYSYMBOL_naosepa_opt = 44,               /* naosepa_opt  */
-  YYSYMBOL_loop = 45,                      /* loop  */
-  YYSYMBOL_expressao = 46,                 /* expressao  */
-  YYSYMBOL_expressao_logica = 47,          /* expressao_logica  */
-  YYSYMBOL_comparacao = 48,                /* comparacao  */
-  YYSYMBOL_adicao = 49,                    /* adicao  */
-  YYSYMBOL_multiplicacao = 50,             /* multiplicacao  */
-  YYSYMBOL_primaria = 51                   /* primaria  */
+  YYSYMBOL_CHECAR_LIXO = 3,                /* CHECAR_LIXO  */
+  YYSYMBOL_ADD_ORGANICO = 4,               /* ADD_ORGANICO  */
+  YYSYMBOL_ADD_RECICLAVEL = 5,             /* ADD_RECICLAVEL  */
+  YYSYMBOL_ESVAZIAR_ORGANICO = 6,          /* ESVAZIAR_ORGANICO  */
+  YYSYMBOL_ESVAZIAR_RECICLAVEL = 7,        /* ESVAZIAR_RECICLAVEL  */
+  YYSYMBOL_MOSTRA_AE = 8,                  /* MOSTRA_AE  */
+  YYSYMBOL_SEPA = 9,                       /* SEPA  */
+  YYSYMBOL_DEPENDENDO = 10,                /* DEPENDENDO  */
+  YYSYMBOL_NAOSEPA = 11,                   /* NAOSEPA  */
+  YYSYMBOL_LOOP = 12,                      /* LOOP  */
+  YYSYMBOL_NUMERO = 13,                    /* NUMERO  */
+  YYSYMBOL_RECICLAVEL = 14,                /* RECICLAVEL  */
+  YYSYMBOL_ORGANICO = 15,                  /* ORGANICO  */
+  YYSYMBOL_CAP_RECICLAVEL = 16,            /* CAP_RECICLAVEL  */
+  YYSYMBOL_CAP_ORGANICO = 17,              /* CAP_ORGANICO  */
+  YYSYMBOL_TIPO_LIXO = 18,                 /* TIPO_LIXO  */
+  YYSYMBOL_IGUAL = 19,                     /* IGUAL  */
+  YYSYMBOL_DIFERENTE = 20,                 /* DIFERENTE  */
+  YYSYMBOL_MENOR_IGUAL = 21,               /* MENOR_IGUAL  */
+  YYSYMBOL_MAIOR_IGUAL = 22,               /* MAIOR_IGUAL  */
+  YYSYMBOL_MENOR = 23,                     /* MENOR  */
+  YYSYMBOL_MAIOR = 24,                     /* MAIOR  */
+  YYSYMBOL_ATRIBUICAO = 25,                /* ATRIBUICAO  */
+  YYSYMBOL_MAIS = 26,                      /* MAIS  */
+  YYSYMBOL_MENOS = 27,                     /* MENOS  */
+  YYSYMBOL_MULT = 28,                      /* MULT  */
+  YYSYMBOL_DIV = 29,                       /* DIV  */
+  YYSYMBOL_ABRE_PAR = 30,                  /* ABRE_PAR  */
+  YYSYMBOL_FECHA_PAR = 31,                 /* FECHA_PAR  */
+  YYSYMBOL_ABRE_CHAVE = 32,                /* ABRE_CHAVE  */
+  YYSYMBOL_FECHA_CHAVE = 33,               /* FECHA_CHAVE  */
+  YYSYMBOL_PONTO_VIRGULA = 34,             /* PONTO_VIRGULA  */
+  YYSYMBOL_YYACCEPT = 35,                  /* $accept  */
+  YYSYMBOL_programa = 36,                  /* programa  */
+  YYSYMBOL_comando = 37,                   /* comando  */
+  YYSYMBOL_atribuicao = 38,                /* atribuicao  */
+  YYSYMBOL_acao = 39,                      /* acao  */
+  YYSYMBOL_condicional = 40,               /* condicional  */
+  YYSYMBOL_41_1 = 41,                      /* $@1  */
+  YYSYMBOL_dependendo_chain = 42,          /* dependendo_chain  */
+  YYSYMBOL_naosepa_opcional = 43,          /* naosepa_opcional  */
+  YYSYMBOL_loop = 44,                      /* loop  */
+  YYSYMBOL_expressao = 45,                 /* expressao  */
+  YYSYMBOL_expressao_logica = 46,          /* expressao_logica  */
+  YYSYMBOL_comparacao = 47,                /* comparacao  */
+  YYSYMBOL_adicao = 48,                    /* adicao  */
+  YYSYMBOL_multiplicacao = 49,             /* multiplicacao  */
+  YYSYMBOL_primaria = 50                   /* primaria  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -565,19 +488,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   118
+#define YYLAST   124
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  34
+#define YYNTOKENS  35
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  18
+#define YYNNTS  16
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  45
+#define YYNRULES  44
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  98
+#define YYNSTATES  97
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   288
+#define YYMAXUTOK   289
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -619,18 +542,18 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int16 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,   119,   119,   121,   125,   126,   127,   128,   132,   141,
-     146,   152,   158,   164,   170,   180,   196,   179,   221,   224,
-     223,   251,   253,   260,   278,   282,   283,   290,   299,   300,
-     306,   312,   318,   327,   328,   334,   343,   344,   350,   359,
-     365,   371,   376,   381,   386,   390
+       0,    37,    37,    39,    43,    44,    45,    46,    50,    54,
+      61,    66,    74,    82,    86,    90,    97,    96,   106,   108,
+     116,   118,   125,   132,   136,   137,   138,   142,   143,   144,
+     145,   146,   150,   151,   152,   156,   157,   158,   169,   170,
+     171,   172,   173,   174,   175
 };
 #endif
 
@@ -646,16 +569,17 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "NUMERO", "ID",
-  "CHECAR_LIXO", "ADD_ORGANICO", "ADD_RECICLAVEL", "ESVAZIAR_ORGANICO",
+  "\"end of file\"", "error", "\"invalid token\"", "CHECAR_LIXO",
+  "ADD_ORGANICO", "ADD_RECICLAVEL", "ESVAZIAR_ORGANICO",
   "ESVAZIAR_RECICLAVEL", "MOSTRA_AE", "SEPA", "DEPENDENDO", "NAOSEPA",
-  "LOOP", "CAP_RECICLAVEL", "CAP_ORGANICO", "TIPO_LIXO", "IGUAL",
-  "DIFERENTE", "MENOR_IGUAL", "MAIOR_IGUAL", "MENOR", "MAIOR",
-  "ATRIBUICAO", "MAIS", "MENOS", "MULT", "DIV", "ABRE_PAR", "FECHA_PAR",
-  "ABRE_CHAVE", "FECHA_CHAVE", "PONTO_VIRGULA", "$accept", "programa",
-  "comando", "atribuicao", "acao", "condicional", "$@1", "$@2",
-  "cond_dependendo_opt", "$@3", "naosepa_opt", "loop", "expressao",
-  "expressao_logica", "comparacao", "adicao", "multiplicacao", "primaria", YY_NULLPTR
+  "LOOP", "NUMERO", "RECICLAVEL", "ORGANICO", "CAP_RECICLAVEL",
+  "CAP_ORGANICO", "TIPO_LIXO", "IGUAL", "DIFERENTE", "MENOR_IGUAL",
+  "MAIOR_IGUAL", "MENOR", "MAIOR", "ATRIBUICAO", "MAIS", "MENOS", "MULT",
+  "DIV", "ABRE_PAR", "FECHA_PAR", "ABRE_CHAVE", "FECHA_CHAVE",
+  "PONTO_VIRGULA", "$accept", "programa", "comando", "atribuicao", "acao",
+  "condicional", "$@1", "dependendo_chain", "naosepa_opcional", "loop",
+  "expressao", "expressao_logica", "comparacao", "adicao", "multiplicacao",
+  "primaria", YY_NULLPTR
 };
 
 static const char *
@@ -665,7 +589,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-26)
+#define YYPACT_NINF (-25)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -679,16 +603,16 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -26,    78,   -26,   -12,     3,    12,    37,    42,    48,    66,
-      67,    68,   -26,    27,    65,   -26,   -26,    52,    69,    70,
-      71,    72,    73,    52,    52,    52,   -26,   -26,   -26,   -26,
-      75,   -26,   -26,   -26,    52,   -26,     4,     5,    33,     2,
-     -26,   -26,   -26,   -26,   -26,   -26,    76,    77,    79,    80,
-      81,    52,    52,    52,    52,    52,    52,    52,    52,    52,
-      52,   -26,   -26,    74,   -26,   -26,     5,     5,    33,    33,
-      33,    33,     2,     2,   -26,   -26,    82,   -26,   -26,    -1,
-      10,   -26,   -26,   -26,    50,    83,    84,   -26,    52,   -26,
-      86,    29,   -26,   -26,    87,   -26,    40,   -26
+     -25,    87,   -25,   -16,    -2,    29,    44,    55,    56,    58,
+      67,     8,    20,   -25,    48,    64,   -25,   -25,    69,    76,
+      77,    78,    79,    53,    53,    53,    53,    53,   -25,   -25,
+     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
+     -25,    53,    80,    -8,    54,    -1,     3,   -25,    81,    82,
+     -25,   -25,    83,   -25,    53,    53,    53,    53,    53,    53,
+      53,    53,    53,    53,    84,    85,   -25,    54,    54,    -1,
+      -1,    -1,    -1,     3,     3,   -25,   -25,   -25,   -25,     1,
+      15,   -25,   -25,   -25,    52,    88,    89,   -25,    53,   -25,
+      91,    32,    92,   -25,   -25,    46,   -25
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -697,29 +621,29 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        2,     0,     1,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     3,     0,     0,     6,     7,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     4,     5,    39,    40,
-       0,    41,    42,    43,     0,     8,    24,    25,    28,    33,
-      36,     9,    10,    11,    12,    13,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    14,    15,     0,    45,    44,    26,    27,    31,    32,
-      29,    30,    34,    35,    37,    38,     0,     2,     2,     0,
-       0,    23,    16,    18,    21,     0,     0,    17,     0,     2,
-       0,     0,    19,    22,     0,     2,     0,    20
+       0,     0,     0,     3,     0,     0,     6,     7,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     4,     5,
+      10,    11,    12,    13,    14,    38,    39,    40,    41,    42,
+      43,     0,     0,    23,    24,    27,    32,    35,     0,     0,
+       8,     9,     0,    15,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    44,    25,    26,    30,
+      31,    28,    29,    33,    34,    36,    37,     2,     2,     0,
+       0,    16,    22,    18,    20,     0,     0,    17,     0,     2,
+       0,     0,     0,    21,     2,     0,    19
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -26,   -25,   -26,   -26,   -26,   -26,   -26,   -26,   -26,   -26,
-     -26,   -26,   -23,   -26,    28,    20,    36,    31
+     -25,    -5,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
+     -24,   -25,   -12,    47,    -4,    18
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,    12,    13,    14,    15,    76,    83,    84,    94,
-      87,    16,    35,    36,    37,    38,    39,    40
+       0,     1,    13,    14,    15,    16,    83,    84,    87,    17,
+      42,    43,    44,    45,    46,    47
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -727,70 +651,72 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      46,    47,    48,     3,     4,     5,     6,     7,     8,     9,
-      10,    50,    17,    11,     3,     4,     5,     6,     7,     8,
-       9,    10,    51,    52,    11,    53,    54,    55,    56,    59,
-      60,    81,    18,     3,     4,     5,     6,     7,     8,     9,
-      10,    19,    82,    11,     3,     4,     5,     6,     7,     8,
-       9,    10,    79,    80,    11,    28,    29,    30,    57,    58,
-      26,    93,    85,    86,    91,    90,    20,    31,    32,    33,
-      96,    21,    97,    68,    69,    70,    71,    22,     2,    66,
-      67,    34,     3,     4,     5,     6,     7,     8,     9,    10,
-      74,    75,    11,    72,    73,    23,    24,    25,    27,    41,
-      42,    43,    44,    45,    49,    77,    61,    62,     0,    63,
-      64,    65,    88,    78,     0,    89,    92,     0,    95
+      48,    49,    50,    51,     3,     4,     5,     6,     7,     8,
+       9,    54,    55,    10,    18,    11,    12,    52,     3,     4,
+       5,     6,     7,     8,     9,    60,    61,    10,    19,    11,
+      12,    62,    63,    26,    81,     3,     4,     5,     6,     7,
+       8,     9,    67,    68,    10,    27,    11,    12,    82,     3,
+       4,     5,     6,     7,     8,     9,    73,    74,    10,    20,
+      11,    12,    85,    86,    90,    93,    35,    36,    37,    38,
+      39,    40,    79,    80,    21,    56,    57,    58,    59,    96,
+      75,    76,    28,    41,    91,    22,    23,     2,    24,    95,
+       3,     4,     5,     6,     7,     8,     9,    25,    29,    10,
+      30,    11,    12,    69,    70,    71,    72,    31,    32,    33,
+      34,    53,    64,    65,    66,     0,    77,    78,    88,     0,
+       0,    89,    92,     0,    94
 };
 
 static const yytype_int8 yycheck[] =
 {
-      23,    24,    25,     4,     5,     6,     7,     8,     9,    10,
-      11,    34,    24,    14,     4,     5,     6,     7,     8,     9,
-      10,    11,    18,    19,    14,    20,    21,    22,    23,    27,
-      28,    32,    29,     4,     5,     6,     7,     8,     9,    10,
-      11,    29,    32,    14,     4,     5,     6,     7,     8,     9,
-      10,    11,    77,    78,    14,     3,     4,     5,    25,    26,
-      33,    32,    12,    13,    89,    88,    29,    15,    16,    17,
-      95,    29,    32,    53,    54,    55,    56,    29,     0,    51,
-      52,    29,     4,     5,     6,     7,     8,     9,    10,    11,
-      59,    60,    14,    57,    58,    29,    29,    29,    33,    30,
-      30,    30,    30,    30,    29,    31,    30,    30,    -1,    30,
-      30,    30,    29,    31,    -1,    31,    30,    -1,    31
+      24,    25,    26,    27,     3,     4,     5,     6,     7,     8,
+       9,    19,    20,    12,    30,    14,    15,    41,     3,     4,
+       5,     6,     7,     8,     9,    26,    27,    12,    30,    14,
+      15,    28,    29,    25,    33,     3,     4,     5,     6,     7,
+       8,     9,    54,    55,    12,    25,    14,    15,    33,     3,
+       4,     5,     6,     7,     8,     9,    60,    61,    12,    30,
+      14,    15,    10,    11,    88,    33,    13,    14,    15,    16,
+      17,    18,    77,    78,    30,    21,    22,    23,    24,    33,
+      62,    63,    34,    30,    89,    30,    30,     0,    30,    94,
+       3,     4,     5,     6,     7,     8,     9,    30,    34,    12,
+      31,    14,    15,    56,    57,    58,    59,    31,    31,    31,
+      31,    31,    31,    31,    31,    -1,    32,    32,    30,    -1,
+      -1,    32,    31,    -1,    32
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    35,     0,     4,     5,     6,     7,     8,     9,    10,
-      11,    14,    36,    37,    38,    39,    45,    24,    29,    29,
-      29,    29,    29,    29,    29,    29,    33,    33,     3,     4,
-       5,    15,    16,    17,    29,    46,    47,    48,    49,    50,
-      51,    30,    30,    30,    30,    30,    46,    46,    46,    29,
-      46,    18,    19,    20,    21,    22,    23,    25,    26,    27,
-      28,    30,    30,    30,    30,    30,    48,    48,    49,    49,
-      49,    49,    50,    50,    51,    51,    40,    31,    31,    35,
-      35,    32,    32,    41,    42,    12,    13,    44,    29,    31,
-      46,    35,    30,    32,    43,    31,    35,    32
+       0,    36,     0,     3,     4,     5,     6,     7,     8,     9,
+      12,    14,    15,    37,    38,    39,    40,    44,    30,    30,
+      30,    30,    30,    30,    30,    30,    25,    25,    34,    34,
+      31,    31,    31,    31,    31,    13,    14,    15,    16,    17,
+      18,    30,    45,    46,    47,    48,    49,    50,    45,    45,
+      45,    45,    45,    31,    19,    20,    21,    22,    23,    24,
+      26,    27,    28,    29,    31,    31,    31,    47,    47,    48,
+      48,    48,    48,    49,    49,    50,    50,    32,    32,    36,
+      36,    33,    33,    41,    42,    10,    11,    43,    30,    32,
+      45,    36,    31,    33,    32,    36,    33
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    34,    35,    35,    36,    36,    36,    36,    37,    38,
-      38,    38,    38,    38,    38,    40,    41,    39,    42,    43,
-      42,    44,    44,    45,    46,    47,    47,    47,    48,    48,
-      48,    48,    48,    49,    49,    49,    50,    50,    50,    51,
-      51,    51,    51,    51,    51,    51
+       0,    35,    36,    36,    37,    37,    37,    37,    38,    38,
+      39,    39,    39,    39,    39,    39,    41,    40,    42,    42,
+      43,    43,    44,    45,    46,    46,    46,    47,    47,    47,
+      47,    47,    48,    48,    48,    49,    49,    49,    50,    50,
+      50,    50,    50,    50,    50
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     2,     2,     2,     1,     1,     3,     3,
-       3,     3,     3,     3,     4,     0,     0,    11,     0,     0,
-       9,     0,     4,     7,     1,     1,     3,     3,     1,     3,
-       3,     3,     3,     1,     3,     3,     1,     3,     3,     1,
-       1,     1,     1,     1,     3,     3
+       3,     3,     3,     3,     3,     4,     0,    10,     0,     8,
+       0,     4,     7,     1,     1,     3,     3,     1,     3,     3,
+       3,     3,     1,     3,     3,     1,     3,     3,     1,     1,
+       1,     1,     1,     1,     3
 };
 
 
@@ -1253,375 +1179,263 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 8: /* atribuicao: ID ATRIBUICAO expressao  */
-#line 133 "parser.y"
-    {
-        /* expressão deixou resultado em R3 */
-        gen_store_R3_to_var((yyvsp[-2].str));
-        free((yyvsp[-2].str));
+  case 8: /* atribuicao: RECICLAVEL ATRIBUICAO expressao  */
+#line 50 "parser.y"
+                                    { 
+        reciclavel = (yyvsp[0].num); 
+        printf("reciclavel = %d\n", reciclavel);
     }
-#line 1264 "parser.tab.c"
+#line 1189 "parser.tab.c"
     break;
 
-  case 9: /* acao: CHECAR_LIXO ABRE_PAR FECHA_PAR  */
+  case 9: /* atribuicao: ORGANICO ATRIBUICAO expressao  */
+#line 54 "parser.y"
+                                    { 
+        organico = (yyvsp[0].num); 
+        printf("organico = %d\n", organico);
+    }
+#line 1198 "parser.tab.c"
+    break;
+
+  case 10: /* acao: CHECAR_LIXO ABRE_PAR FECHA_PAR  */
+#line 61 "parser.y"
+                                   { 
+        printf("Checando tipo do lixo...\n");
+        tipoLixo = rand() % 2; // Simula detecção do tipo
+        printf("Tipo detectado: %s\n", tipoLixo ? "Reciclável" : "Orgânico");
+    }
+#line 1208 "parser.tab.c"
+    break;
+
+  case 11: /* acao: ADD_ORGANICO ABRE_PAR FECHA_PAR  */
+#line 66 "parser.y"
+                                      {
+        if (organico < capOrganico) {
+            organico++;
+            printf("Lixo orgânico adicionado. Total: %d/%d\n", organico, capOrganico);
+        } else {
+            printf("Lixo orgânico cheio! Esvazie antes de adicionar mais.\n");
+        }
+    }
+#line 1221 "parser.tab.c"
+    break;
+
+  case 12: /* acao: ADD_RECICLAVEL ABRE_PAR FECHA_PAR  */
+#line 74 "parser.y"
+                                        {
+        if (reciclavel < capReciclavel) {
+            reciclavel++;
+            printf("Lixo reciclável adicionado. Total: %d/%d\n", reciclavel, capReciclavel);
+        } else {
+            printf("Lixo reciclável cheio! Esvazie antes de adicionar mais.\n");
+        }
+    }
+#line 1234 "parser.tab.c"
+    break;
+
+  case 13: /* acao: ESVAZIAR_ORGANICO ABRE_PAR FECHA_PAR  */
+#line 82 "parser.y"
+                                           {
+        organico = 0;
+        printf("Lixo orgânico esvaziado.\n");
+    }
+#line 1243 "parser.tab.c"
+    break;
+
+  case 14: /* acao: ESVAZIAR_RECICLAVEL ABRE_PAR FECHA_PAR  */
+#line 86 "parser.y"
+                                             {
+        reciclavel = 0;
+        printf("Lixo reciclável esvaziado.\n");
+    }
+#line 1252 "parser.tab.c"
+    break;
+
+  case 15: /* acao: MOSTRA_AE ABRE_PAR expressao FECHA_PAR  */
+#line 90 "parser.y"
+                                             {
+        printf("Mostrando: %d\n", (yyvsp[-1].num));
+    }
+#line 1260 "parser.tab.c"
+    break;
+
+  case 16: /* $@1: %empty  */
+#line 97 "parser.y"
+    {
+        if ((yyvsp[-4].num)) {
+            printf("Condição 'sepa' verdadeira\n");
+        }
+    }
+#line 1270 "parser.tab.c"
+    break;
+
+  case 19: /* dependendo_chain: dependendo_chain DEPENDENDO ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE  */
+#line 109 "parser.y"
+    {
+        if ((yyvsp[-4].num)) {
+            printf("Condição 'dependendo' verdadeira\n");
+        }
+    }
+#line 1280 "parser.tab.c"
+    break;
+
+  case 21: /* naosepa_opcional: NAOSEPA ABRE_CHAVE programa FECHA_CHAVE  */
+#line 119 "parser.y"
+    {
+        printf("Executando bloco 'naosepa'\n");
+    }
+#line 1288 "parser.tab.c"
+    break;
+
+  case 22: /* loop: LOOP ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE  */
+#line 126 "parser.y"
+    {
+        printf("Loop while executado\n");
+    }
+#line 1296 "parser.tab.c"
+    break;
+
+  case 23: /* expressao: expressao_logica  */
+#line 132 "parser.y"
+                     { (yyval.num) = (yyvsp[0].num); }
+#line 1302 "parser.tab.c"
+    break;
+
+  case 24: /* expressao_logica: comparacao  */
+#line 136 "parser.y"
+               { (yyval.num) = (yyvsp[0].num); }
+#line 1308 "parser.tab.c"
+    break;
+
+  case 25: /* expressao_logica: expressao_logica IGUAL comparacao  */
+#line 137 "parser.y"
+                                        { (yyval.num) = ((yyvsp[-2].num) == (yyvsp[0].num)); }
+#line 1314 "parser.tab.c"
+    break;
+
+  case 26: /* expressao_logica: expressao_logica DIFERENTE comparacao  */
+#line 138 "parser.y"
+                                            { (yyval.num) = ((yyvsp[-2].num) != (yyvsp[0].num)); }
+#line 1320 "parser.tab.c"
+    break;
+
+  case 27: /* comparacao: adicao  */
 #line 142 "parser.y"
-        {
-          emit("; action ChecarOLixo()");
-          emit("LOADSENSOR R3 TIPO_LIXO");
-        }
-#line 1273 "parser.tab.c"
+           { (yyval.num) = (yyvsp[0].num); }
+#line 1326 "parser.tab.c"
     break;
 
-  case 10: /* acao: ADD_ORGANICO ABRE_PAR FECHA_PAR  */
-#line 147 "parser.y"
-        {
-            emit("; action ADD_ORGANICO -> INC R1");
-            emit("INC R1");
-            emit("PRINT R1");
-        }
-#line 1283 "parser.tab.c"
+  case 28: /* comparacao: comparacao MENOR adicao  */
+#line 143 "parser.y"
+                              { (yyval.num) = ((yyvsp[-2].num) < (yyvsp[0].num)); }
+#line 1332 "parser.tab.c"
     break;
 
-  case 11: /* acao: ADD_RECICLAVEL ABRE_PAR FECHA_PAR  */
-#line 153 "parser.y"
-        {
-            emit("; action ADD_RECICLAVEL -> INC R2");
-            emit("INC R2");
-            emit("PRINT R2");
-        }
-#line 1293 "parser.tab.c"
+  case 29: /* comparacao: comparacao MAIOR adicao  */
+#line 144 "parser.y"
+                              { (yyval.num) = ((yyvsp[-2].num) > (yyvsp[0].num)); }
+#line 1338 "parser.tab.c"
     break;
 
-  case 12: /* acao: ESVAZIAR_ORGANICO ABRE_PAR FECHA_PAR  */
-#line 159 "parser.y"
-        {
-            emit("; action ESVAZIAR_ORGANICO -> SET R1 0");
-            emit("SET R1 0");
-            emit("PRINT R1");
-        }
-#line 1303 "parser.tab.c"
+  case 30: /* comparacao: comparacao MENOR_IGUAL adicao  */
+#line 145 "parser.y"
+                                    { (yyval.num) = ((yyvsp[-2].num) <= (yyvsp[0].num)); }
+#line 1344 "parser.tab.c"
     break;
 
-  case 13: /* acao: ESVAZIAR_RECICLAVEL ABRE_PAR FECHA_PAR  */
-#line 165 "parser.y"
-        {
-            emit("; action ESVAZIAR_RECICLAVEL -> SET R2 0");
-            emit("SET R2 0");
-            emit("PRINT R2");
-        }
-#line 1313 "parser.tab.c"
+  case 31: /* comparacao: comparacao MAIOR_IGUAL adicao  */
+#line 146 "parser.y"
+                                    { (yyval.num) = ((yyvsp[-2].num) >= (yyvsp[0].num)); }
+#line 1350 "parser.tab.c"
     break;
 
-  case 14: /* acao: MOSTRA_AE ABRE_PAR expressao FECHA_PAR  */
-#line 171 "parser.y"
-        {
-            emit("; action mostraAe -> PRINT R3");
-            emit("PRINT R3");
-        }
-#line 1322 "parser.tab.c"
+  case 32: /* adicao: multiplicacao  */
+#line 150 "parser.y"
+                  { (yyval.num) = (yyvsp[0].num); }
+#line 1356 "parser.tab.c"
     break;
 
-  case 15: /* $@1: %empty  */
-#line 180 "parser.y"
-        {
-            /* cria labels para else e end; expressão já deixou resultado em R3 */
-            char *Lelse = new_label();
-            char *Lend  = new_label();
-            if (if_sp >= IF_STACK_MAX) {
-                yyerror("too many nested ifs");
-                YYABORT;
-            }
-            if_else_stack[if_sp] = Lelse;
-            if_end_stack[if_sp]  = Lend;
-            if_sp++;
-            emit("; if start - if_sp=%d", if_sp);
-            /* se R3 == 0 pula para else */
-            emit("JZ R3 %s", Lelse);
-        }
-#line 1342 "parser.tab.c"
+  case 33: /* adicao: adicao MAIS multiplicacao  */
+#line 151 "parser.y"
+                                { (yyval.num) = (yyvsp[-2].num) + (yyvsp[0].num); }
+#line 1362 "parser.tab.c"
     break;
 
-  case 16: /* $@2: %empty  */
-#line 196 "parser.y"
-        {
-            /* após then: pular para end e colocar label else */
-            emit("JMP %s", if_end_stack[if_sp-1]);
-            emit("LABEL %s", if_else_stack[if_sp-1]);
-        }
-#line 1352 "parser.tab.c"
+  case 34: /* adicao: adicao MENOS multiplicacao  */
+#line 152 "parser.y"
+                                 { (yyval.num) = (yyvsp[-2].num) - (yyvsp[0].num); }
+#line 1368 "parser.tab.c"
     break;
 
-  case 17: /* condicional: SEPA ABRE_PAR expressao FECHA_PAR $@1 ABRE_CHAVE programa FECHA_CHAVE $@2 cond_dependendo_opt naosepa_opt  */
-#line 203 "parser.y"
-    {
-        /* final do if: coloca label end e limpa pilha */
-        emit("LABEL %s", if_end_stack[if_sp-1]);
-        free(if_else_stack[if_sp-1]);
-        free(if_end_stack[if_sp-1]);
-        if_else_stack[if_sp-1] = NULL;
-        if_end_stack[if_sp-1] = NULL;
-        if_sp--;
+  case 35: /* multiplicacao: primaria  */
+#line 156 "parser.y"
+             { (yyval.num) = (yyvsp[0].num); }
+#line 1374 "parser.tab.c"
+    break;
+
+  case 36: /* multiplicacao: multiplicacao MULT primaria  */
+#line 157 "parser.y"
+                                  { (yyval.num) = (yyvsp[-2].num) * (yyvsp[0].num); }
+#line 1380 "parser.tab.c"
+    break;
+
+  case 37: /* multiplicacao: multiplicacao DIV primaria  */
+#line 158 "parser.y"
+                                 { 
+        if ((yyvsp[0].num) == 0) {
+            yyerror("Divisão por zero!");
+            (yyval.num) = 0;
+        } else {
+            (yyval.num) = (yyvsp[-2].num) / (yyvsp[0].num);
+        }
     }
-#line 1366 "parser.tab.c"
+#line 1393 "parser.tab.c"
     break;
 
-  case 19: /* $@3: %empty  */
-#line 224 "parser.y"
-        {
-            /* cria label que será colocado após o body */
-            char *Lnext = new_label();
-            if (depend_sp >= IF_STACK_MAX) {
-                yyerror("too many nested dependendo");
-                YYABORT;
-            }
-            depend_stack[depend_sp++] = Lnext;
-            /* se expr == 0 pula para Lnext */
-            emit("; dependendo: if not (expr) jump to next dependendo");
-            emit("JZ R3 %s", Lnext);
-        }
-#line 1383 "parser.tab.c"
-    break;
-
-  case 20: /* cond_dependendo_opt: cond_dependendo_opt DEPENDENDO ABRE_PAR expressao FECHA_PAR $@3 ABRE_CHAVE programa FECHA_CHAVE  */
-#line 237 "parser.y"
-        {
-            /* body acabado: pular para end e colocar LABEL Lnext (top of depend_stack) */
-            if (depend_sp <= 0) {
-                /* shouldn't happen */
-            } else {
-                char *Lnext2 = depend_stack[--depend_sp];
-                emit("JMP %s", if_end_stack[if_sp-1]);
-                emit("LABEL %s", Lnext2);
-                free(Lnext2);
-            }
-        }
+  case 38: /* primaria: NUMERO  */
+#line 169 "parser.y"
+           { (yyval.num) = (yyvsp[0].num); }
 #line 1399 "parser.tab.c"
     break;
 
-  case 22: /* naosepa_opt: NAOSEPA ABRE_CHAVE programa FECHA_CHAVE  */
-#line 254 "parser.y"
-        {
-            /* corpo do else já foi emitido pelo 'programa' */
-        }
-#line 1407 "parser.tab.c"
+  case 39: /* primaria: RECICLAVEL  */
+#line 170 "parser.y"
+                 { (yyval.num) = reciclavel; }
+#line 1405 "parser.tab.c"
     break;
 
-  case 23: /* loop: LOOP ABRE_PAR expressao FECHA_PAR ABRE_CHAVE programa FECHA_CHAVE  */
-#line 261 "parser.y"
-    {
-        /* implementa laço simples: assume expressao deixou resultado em R3;
-           aqui criamos labels e montamos a estrutura */
-        char *Lstart = new_label();
-        char *Lend = new_label();
-        emit("LABEL %s", Lstart);
-        /* condição: se R3 == 0 sair */
-        emit("JZ R3 %s", Lend);
-        /* corpo já emitido */
-        emit("JMP %s", Lstart);
-        emit("LABEL %s", Lend);
-        free(Lstart);
-        free(Lend);
-    }
-#line 1426 "parser.tab.c"
-    break;
-
-  case 24: /* expressao: expressao_logica  */
-#line 278 "parser.y"
-                     { (yyval.num) = (yyvsp[0].num); }
-#line 1432 "parser.tab.c"
-    break;
-
-  case 25: /* expressao_logica: comparacao  */
-#line 282 "parser.y"
-               { (yyval.num) = (yyvsp[0].num); }
-#line 1438 "parser.tab.c"
-    break;
-
-  case 26: /* expressao_logica: expressao_logica IGUAL comparacao  */
-#line 284 "parser.y"
-        {
-            emit("; EQ operation");
-            emit("MOV R4 R3"); /* left -> R4 */
-            /* comparacao produced R3 for right */
-            gen_cmp_result_in_R3("==");
-        }
-#line 1449 "parser.tab.c"
-    break;
-
-  case 27: /* expressao_logica: expressao_logica DIFERENTE comparacao  */
-#line 291 "parser.y"
-        {
-            emit("; NE operation");
-            emit("MOV R4 R3");
-            gen_cmp_result_in_R3("!=");
-        }
-#line 1459 "parser.tab.c"
-    break;
-
-  case 28: /* comparacao: adicao  */
-#line 299 "parser.y"
-           { (yyval.num) = (yyvsp[0].num); }
-#line 1465 "parser.tab.c"
-    break;
-
-  case 29: /* comparacao: comparacao MENOR adicao  */
-#line 301 "parser.y"
-        {
-            emit("; LT operation");
-            emit("MOV R4 R3");
-            gen_cmp_result_in_R3("<");
-        }
-#line 1475 "parser.tab.c"
-    break;
-
-  case 30: /* comparacao: comparacao MAIOR adicao  */
-#line 307 "parser.y"
-        {
-            emit("; GT operation");
-            emit("MOV R4 R3");
-            gen_cmp_result_in_R3(">");
-        }
-#line 1485 "parser.tab.c"
-    break;
-
-  case 31: /* comparacao: comparacao MENOR_IGUAL adicao  */
-#line 313 "parser.y"
-        {
-            emit("; LE operation");
-            emit("MOV R4 R3");
-            gen_cmp_result_in_R3("<=");
-        }
-#line 1495 "parser.tab.c"
-    break;
-
-  case 32: /* comparacao: comparacao MAIOR_IGUAL adicao  */
-#line 319 "parser.y"
-        {
-            emit("; GE operation");
-            emit("MOV R4 R3");
-            gen_cmp_result_in_R3(">=");
-        }
-#line 1505 "parser.tab.c"
-    break;
-
-  case 33: /* adicao: multiplicacao  */
-#line 327 "parser.y"
-                  { (yyval.num) = (yyvsp[0].num); }
-#line 1511 "parser.tab.c"
-    break;
-
-  case 34: /* adicao: adicao MAIS multiplicacao  */
-#line 329 "parser.y"
-        {
-            emit("; ADD");
-            emit("MOV R4 R3"); /* left -> R4 */
-            gen_arith_with_R4_R3("+");
-        }
-#line 1521 "parser.tab.c"
-    break;
-
-  case 35: /* adicao: adicao MENOS multiplicacao  */
-#line 335 "parser.y"
-        {
-            emit("; SUB");
-            emit("MOV R4 R3");
-            gen_arith_with_R4_R3("-");
-        }
-#line 1531 "parser.tab.c"
-    break;
-
-  case 36: /* multiplicacao: primaria  */
-#line 343 "parser.y"
-             { (yyval.num) = (yyvsp[0].num); }
-#line 1537 "parser.tab.c"
-    break;
-
-  case 37: /* multiplicacao: multiplicacao MULT primaria  */
-#line 345 "parser.y"
-        {
-            emit("; MUL");
-            emit("MOV R4 R3");
-            gen_arith_with_R4_R3("*");
-        }
-#line 1547 "parser.tab.c"
-    break;
-
-  case 38: /* multiplicacao: multiplicacao DIV primaria  */
-#line 351 "parser.y"
-        {
-            emit("; DIV");
-            emit("MOV R4 R3");
-            gen_arith_with_R4_R3("/");
-        }
-#line 1557 "parser.tab.c"
-    break;
-
-  case 39: /* primaria: NUMERO  */
-#line 360 "parser.y"
-        {
-            emit("; load literal");
-            emit("SET R3 %d", (yyvsp[0].num));
-            (yyval.num) = (yyvsp[0].num);
-        }
-#line 1567 "parser.tab.c"
-    break;
-
-  case 40: /* primaria: ID  */
-#line 366 "parser.y"
-        {
-            gen_eval_id_to_R3((yyvsp[0].str));
-            free((yyvsp[0].str));
-            (yyval.num) = 0;
-        }
-#line 1577 "parser.tab.c"
+  case 40: /* primaria: ORGANICO  */
+#line 171 "parser.y"
+               { (yyval.num) = organico; }
+#line 1411 "parser.tab.c"
     break;
 
   case 41: /* primaria: CAP_RECICLAVEL  */
-#line 372 "parser.y"
-        {
-            emit("LOADSENSOR R3 CAP_RECICLAVEL");
-            (yyval.num) = 0;
-        }
-#line 1586 "parser.tab.c"
+#line 172 "parser.y"
+                     { (yyval.num) = capReciclavel; }
+#line 1417 "parser.tab.c"
     break;
 
   case 42: /* primaria: CAP_ORGANICO  */
-#line 377 "parser.y"
-        {
-            emit("LOADSENSOR R3 CAP_ORGANICO");
-            (yyval.num) = 0;
-        }
-#line 1595 "parser.tab.c"
+#line 173 "parser.y"
+                   { (yyval.num) = capOrganico; }
+#line 1423 "parser.tab.c"
     break;
 
   case 43: /* primaria: TIPO_LIXO  */
-#line 382 "parser.y"
-        {
-            emit("LOADSENSOR R3 TIPO_LIXO");
-            (yyval.num) = 0;
-        }
-#line 1604 "parser.tab.c"
+#line 174 "parser.y"
+                { (yyval.num) = tipoLixo; }
+#line 1429 "parser.tab.c"
     break;
 
   case 44: /* primaria: ABRE_PAR expressao FECHA_PAR  */
-#line 387 "parser.y"
-        {
-            (yyval.num) = (yyvsp[-1].num);
-        }
-#line 1612 "parser.tab.c"
-    break;
-
-  case 45: /* primaria: CHECAR_LIXO ABRE_PAR FECHA_PAR  */
-#line 391 "parser.y"
-        {
-            gen_eval_checar_to_R3();
-            (yyval.num) = 0;
-        }
-#line 1621 "parser.tab.c"
+#line 175 "parser.y"
+                                   { (yyval.num) = (yyvsp[-1].num); }
+#line 1435 "parser.tab.c"
     break;
 
 
-#line 1625 "parser.tab.c"
+#line 1439 "parser.tab.c"
 
       default: break;
     }
@@ -1814,24 +1628,18 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 397 "parser.y"
+#line 178 "parser.y"
 
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintático: %s\n", s);
+    fprintf(stderr, "Erro: %s\n", s);
 }
 
-int main(int argc, char *argv[]) {
-    const char *outname = "program.asm";
-    codegen_init(outname);
-    printf("LixeiraLang - gerando assembly em %s\n", outname);
-
-    if (yyparse() == 0) {
-        printf("Analise concluida: sintaxe aceita.\n");
-    } else {
-        printf("Analise concluida: erros detectados.\n");
-    }
-
-    codegen_close();
-    return 0;
+int main() {
+    printf("=== Sistema Inteligente de Reciclagem ===\n");
+    printf("Estado inicial:\n");
+    printf("  Lixo Orgânico: %d/%d\n", organico, capOrganico);
+    printf("  Lixo Reciclável: %d/%d\n\n", reciclavel, capReciclavel);
+    
+    return yyparse();
 }

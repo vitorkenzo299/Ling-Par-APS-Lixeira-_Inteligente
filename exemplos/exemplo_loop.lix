@@ -1,0 +1,5 @@
+contador = 3;
+_707070_SenNaoDer_70_Denovo_ (contador) {
+    mostraAe(contador);
+    contador = contador - 1;
+}

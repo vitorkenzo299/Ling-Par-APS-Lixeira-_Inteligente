@@ -1,0 +1,11 @@
+3
+
+-- VM final state --
+Registers:
+  R1 = 0
+  R2 = 0
+  R3 = 0
+  R4 = 1
+Variables:
+  contador = 0
+-- end --

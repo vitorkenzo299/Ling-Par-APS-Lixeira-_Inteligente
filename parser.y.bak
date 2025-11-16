@@ -21,10 +21,7 @@ static int depend_sp = 0;
 /* mapear destinos fixos */
 
    static const char *map_var_to_reg(const char *name) __attribute__((unused));
-   
-   static const char *map_var_to_reg(const char *name) __attribute__((unused));
    static const char *map_var_to_reg(const char *name) {
-  
   
     if (!name) return NULL;
     if (strcmp(name, "reciclavel") == 0) return "R2";
